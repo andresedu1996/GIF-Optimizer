@@ -5,12 +5,22 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+
+// Ensure necessary folders exist
+["uploads", "optimized"].forEach((dir) => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir);
+  }
+});
 
 app.use(express.static('public'));
 app.use(require('cors')());
 
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({
+  dest: 'uploads/',
+  limits: { fileSize: 5 * 1024 * 1024 }, // Optional: 5MB max file size
+});
 
 app.post('/optimize', upload.single('gif'), (req, res) => {
   const inputPath = req.file.path;
@@ -24,7 +34,6 @@ app.post('/optimize', upload.single('gif'), (req, res) => {
       return res.status(500).send('Failed to optimize GIF');
     }
 
-    // Check file size
     const stats = fs.statSync(outputPath);
     if (stats.size > 5 * 1024 * 1024) {
       return res.status(400).send('Optimized GIF exceeds 5MB');
@@ -35,5 +44,5 @@ app.post('/optimize', upload.single('gif'), (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });

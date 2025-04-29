@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GIF Optimizer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="glass-container">
+    <h1>GIF Optimizer</h1>
+    <input type="file" accept="image/gif" id="gifInput" />
+    <br />
+    <button onclick="optimizeGif()">Optimize</button>
+    <div id="preview"></div>
+    <a id="downloadLink" download="optimized.gif">Download Optimized GIF</a>
+  </div>
+
+  <script>
+    async function optimizeGif() {
+      const file = document.getElementById('gifInput').files[0];
+      if (!file) return alert('Please upload a GIF');
+
+      const formData = new FormData();
+      formData.append('gif', file);
+
+      const response = await fetch('/optimize', {
+        method: 'POST',
+        body: formData
+      });
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      document.getElementById('preview').innerHTML = `<img src="${url}" />`;
+      document.getElementById('downloadLink').href = url;
+    }
+  </script>
+</body>
+</html>
